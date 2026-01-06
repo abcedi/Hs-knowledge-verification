@@ -47,13 +47,17 @@
       if (!/^\d{7}$/.test(clean)) return null; // 🔒 EXACTLY 7 digits
       return `${clean}@hsquiz.local`;
     }
-
+    function pinToPassword(pin) {
+      // Firebase requires at least 6 characters
+      return `hs-${pin}`; // example: 1234 → hs-1234
+    }
     document.getElementById("login").onclick = async () => {
       const email = toEmailFromBadge(badgeEl.value);
-      const pin = (pinEl.value || "").trim();
+      const rawPin = (pinEl.value || "").trim();
 
-      if (!email) return log("Badge number must be exactly 7 digits.");
-      if (!/^\d{4}$/.test(pin)) return log("PIN must be exactly 4 digits.");
+      if (!/^\d{4}$/.test(rawPin)) return log("PIN must be exactly 4 digits.");
+
+      const pin = pinToPassword(rawPin);
 
       try {
         const cred = await signInWithEmailAndPassword(auth, email, pin);
