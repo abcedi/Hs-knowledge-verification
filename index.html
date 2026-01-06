@@ -3,15 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HS Quiz Login Test</title>
+  <title>HS Quiz Login</title>
 </head>
 <body>
-  <h1>HS Quiz – Login Test</h1>
+  <h1>Health & Safety Knowledge Check</h1>
 
-  <input id="badge" inputmode="numeric" placeholder="Badge number" />
-  <input id="pin" type="password" inputmode="numeric" placeholder="4-digit PIN" />
+  <input
+    id="badge"
+    inputmode="numeric"
+    placeholder="7-digit badge number"
+  />
+
+  <input
+    id="pin"
+    type="password"
+    inputmode="numeric"
+    placeholder="4-digit PIN"
+  />
+
   <button id="login">Log in</button>
   <button id="logout">Log out</button>
+
   <pre id="out"></pre>
 
   <script type="module">
@@ -22,15 +34,17 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    const out = document.getElementById("out");
     const badgeEl = document.getElementById("badge");
     const pinEl = document.getElementById("pin");
+    const out = document.getElementById("out");
 
-    function log(msg) { out.textContent = msg; }
+    function log(msg) {
+      out.textContent = msg;
+    }
 
     function toEmailFromBadge(badge) {
       const clean = (badge || "").trim();
-      if (!/^\d{3,10}$/.test(clean)) return null; // adjust if your badge length is fixed
+      if (!/^\d{7}$/.test(clean)) return null; // 🔒 EXACTLY 7 digits
       return `${clean}@hsquiz.local`;
     }
 
@@ -38,26 +52,28 @@
       const email = toEmailFromBadge(badgeEl.value);
       const pin = (pinEl.value || "").trim();
 
-      if (!email) return log("Badge must be 3–10 digits.");
-      if (!/^\d{4}$/.test(pin)) return log("PIN must be 4 digits.");
+      if (!email) return log("Badge number must be exactly 7 digits.");
+      if (!/^\d{4}$/.test(pin)) return log("PIN must be exactly 4 digits.");
 
       try {
         const cred = await signInWithEmailAndPassword(auth, email, pin);
-        log(`Logged in as badge ${badgeEl.value}\nUID: ${cred.user.uid}`);
+        log(`Logged in as badge ${badgeEl.value}`);
         window.location.href = "quiz.html";
       } catch (e) {
         pinEl.value = "";
-        log(e.message);
+        log("Invalid badge or PIN.");
       }
     };
 
     document.getElementById("logout").onclick = async () => {
       await signOut(auth);
-      log("Logged out");
+      log("Logged out.");
     };
 
     onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = "quiz.html";
+      if (user) {
+        window.location.href = "quiz.html";
+      }
     });
   </script>
 </body>
