@@ -1,1 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HS Quiz Login Test</title>
+</head>
+<body>
+  <h1>HS Quiz – Login Test</h1>
 
+  <input id="email" type="email" placeholder="email" />
+  <input id="pass" type="password" placeholder="password" />
+  <button id="signup">Sign up</button>
+  <button id="login">Log in</button>
+  <button id="logout">Log out</button>
+
+  <pre id="out"></pre>
+
+  <script type="module">
+    import { auth } from "./firebase.js";
+    import {
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+    const out = document.getElementById("out");
+    const email = document.getElementById("email");
+    const pass = document.getElementById("pass");
+
+    function log(msg) { out.textContent = msg; }
+
+    document.getElementById("signup").onclick = async () => {
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email.value, pass.value);
+        log("Signed up: " + cred.user.uid);
+      } catch (e) { log(e.message); }
+    };
+
+    document.getElementById("login").onclick = async () => {
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email.value, pass.value);
+        log("Logged in: " + cred.user.uid);
+      } catch (e) { log(e.message); }
+    };
+
+    document.getElementById("logout").onclick = async () => {
+      await signOut(auth);
+      log("Logged out");
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) log("Auth state: logged in as " + user.email + "\nUID: " + user.uid);
+      else log("Auth state: logged out");
+    });
+  </script>
+</body>
+</html>
