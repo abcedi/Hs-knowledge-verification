@@ -8,41 +8,47 @@
 <body>
   <h1>HS Quiz – Login Test</h1>
 
-  <input id="email" type="email" placeholder="email" />
-  <input id="pass" type="password" placeholder="password" />
-  <button id="signup">Sign up</button>
+  <input id="badge" inputmode="numeric" placeholder="Badge number" />
+  <input id="pin" type="password" inputmode="numeric" placeholder="4-digit PIN" />
   <button id="login">Log in</button>
   <button id="logout">Log out</button>
-
   <pre id="out"></pre>
 
   <script type="module">
     import { auth } from "./firebase.js";
     import {
-      createUserWithEmailAndPassword,
       signInWithEmailAndPassword,
       signOut,
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
     const out = document.getElementById("out");
-    const email = document.getElementById("email");
-    const pass = document.getElementById("pass");
+    const badgeEl = document.getElementById("badge");
+    const pinEl = document.getElementById("pin");
 
     function log(msg) { out.textContent = msg; }
 
-    document.getElementById("signup").onclick = async () => {
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email.value, pass.value);
-        log("Signed up: " + cred.user.uid);
-      } catch (e) { log(e.message); }
-    };
+    function toEmailFromBadge(badge) {
+      const clean = (badge || "").trim();
+      if (!/^\d{3,10}$/.test(clean)) return null; // adjust if your badge length is fixed
+      return `${clean}@hsquiz.local`;
+    }
 
     document.getElementById("login").onclick = async () => {
+      const email = toEmailFromBadge(badgeEl.value);
+      const pin = (pinEl.value || "").trim();
+
+      if (!email) return log("Badge must be 3–10 digits.");
+      if (!/^\d{4}$/.test(pin)) return log("PIN must be 4 digits.");
+
       try {
-        const cred = await signInWithEmailAndPassword(auth, email.value, pass.value);
-        log("Logged in: " + cred.user.uid);
-      } catch (e) { log(e.message); }
+        const cred = await signInWithEmailAndPassword(auth, email, pin);
+        log(`Logged in as badge ${badgeEl.value}\nUID: ${cred.user.uid}`);
+        window.location.href = "quiz.html";
+      } catch (e) {
+        pinEl.value = "";
+        log(e.message);
+      }
     };
 
     document.getElementById("logout").onclick = async () => {
@@ -51,8 +57,7 @@
     };
 
     onAuthStateChanged(auth, (user) => {
-      if (user) log("Auth state: logged in as " + user.email + "\nUID: " + user.uid);
-      else log("Auth state: logged out");
+      if (user) window.location.href = "quiz.html";
     });
   </script>
 </body>
