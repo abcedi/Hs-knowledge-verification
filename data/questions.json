@@ -1,0 +1,14 @@
+[
+  {
+    "id": "incident_001",
+    "topic": "Incident Reporting",
+    "question": "When must a workplace incident be reported?",
+    "choices": [
+      "End of shift",
+      "Immediately",
+      "Within 24 hours",
+      "Only if medical aid is needed"
+    ],
+    "answerIndex": 1
+  }
+]
