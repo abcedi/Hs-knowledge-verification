@@ -3,38 +3,78 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HS Knowledge Quiz</title>
+  <title>Health & Safety Knowledge Quiz</title>
 
   <style>
-    body { margin: 0; padding: 18px; font-family: system-ui, -apple-system, Arial; }
-    #quiz { padding-bottom: 90px; } /* space so content doesn't hide behind button */
-    .qblock { margin: 18px 0; }
-    .topic { opacity: 0.75; font-style: italic; }
+    body {
+      margin: 0;
+      padding: 18px;
+      font-family: system-ui, -apple-system, Arial;
+      background: #0f0f0f;
+      color: #fff;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+    }
+
+    .qblock {
+      margin: 20px 0;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #333;
+    }
+
+    .topic {
+      opacity: 0.7;
+      font-style: italic;
+      font-size: 0.9em;
+    }
+
+    label {
+      display: block;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    #quiz {
+      padding-bottom: 110px; /* space for fixed button */
+    }
+
     #submit {
       position: fixed;
-      left: 14px;
-      right: 14px;
-      bottom: 14px;
-      padding: 16px;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      padding: 18px;
       font-size: 18px;
-      border-radius: 12px;
-      border: 1px solid #555;
-      background: #111;
+      border-radius: 14px;
+      border: none;
+      background: #1e90ff;
       color: #fff;
       z-index: 9999;
       cursor: pointer;
       touch-action: manipulation;
     }
-    #result { white-space: pre-wrap; margin-top: 12px; }
+
+    #submit:disabled {
+      opacity: 0.7;
+    }
+
+    #status {
+      margin-top: 12px;
+      white-space: pre-wrap;
+      font-size: 0.95em;
+    }
   </style>
 </head>
+
 <body>
   <h1>Health & Safety Knowledge Check</h1>
 
   <div id="quiz"></div>
 
   <button id="submit" type="button">Submit</button>
-  <pre id="result">Loading…</pre>
+  <div id="status">Loading…</div>
 
   <script type="module">
     import { auth, db } from "./firebase.js";
@@ -42,45 +82,61 @@
     import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
     const quizDiv = document.getElementById("quiz");
-    const result = document.getElementById("result");
     const submitBtn = document.getElementById("submit");
+    const statusEl = document.getElementById("status");
+
     let questions = [];
 
+    // Ensure user is logged in
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
         return;
       }
+
       await loadQuiz();
-      result.textContent = "Ready ✅ (answer and press Submit)";
+      statusEl.textContent = "Answer the questions, then press Submit.";
     });
 
     async function loadQuiz() {
-      const res = await fetch("./data/questions.json", { cache: "no-store" });
-      questions = await res.json();
+      try {
+        const res = await fetch("./data/questions.json", { cache: "no-store" });
+        questions = await res.json();
 
-      quizDiv.innerHTML = "";
-      questions.forEach((q, i) => {
-        const block = document.createElement("div");
-        block.className = "qblock";
-        block.innerHTML = `
-          <div><strong>${i + 1}. ${q.question}</strong> <span class="topic">(${q.topic})</span></div>
-          ${q.choices.map((c, idx) =>
-            `<label style="display:block; margin-top:8px;">
-              <input type="radio" name="q${i}" value="${idx}">
-              ${c}
-            </label>`
-          ).join("")}
-        `;
-        quizDiv.appendChild(block);
-      });
+        quizDiv.innerHTML = "";
+
+        questions.forEach((q, i) => {
+          const block = document.createElement("div");
+          block.className = "qblock";
+
+          block.innerHTML = `
+            <div>
+              <strong>${i + 1}. ${q.question}</strong>
+              <div class="topic">(${q.topic})</div>
+            </div>
+            ${q.choices.map((c, idx) => `
+              <label>
+                <input type="radio" name="q${i}" value="${idx}">
+                ${c}
+              </label>
+            `).join("")}
+          `;
+
+          quizDiv.appendChild(block);
+        });
+      } catch (err) {
+        statusEl.textContent = "Failed to load questions.";
+      }
     }
 
     async function handleSubmit(e) {
       e.preventDefault();
 
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+      statusEl.textContent = "Submitting…";
+
       if (!auth.currentUser) {
-        result.textContent = "Not logged in. Redirecting…";
         window.location.href = "index.html";
         return;
       }
@@ -92,8 +148,9 @@
         const selected = document.querySelector(`input[name="q${i}"]:checked`);
         const chosen = selected ? Number(selected.value) : null;
 
-        if (chosen === q.answerIndex) score++;
-        else {
+        if (chosen === q.answerIndex) {
+          score++;
+        } else {
           wrong.push({
             questionId: q.id,
             topic: q.topic,
@@ -112,13 +169,17 @@
           createdAt: serverTimestamp()
         });
 
-        result.textContent = `Saved ✅  Score: ${score} / ${questions.length}\nWrong: ${wrong.length}`;
+        // Always redirect so user KNOWS something happened
+        window.location.href =
+          `results.html?status=ok&score=${score}&total=${questions.length}&wrong=${wrong.length}`;
+
       } catch (err) {
-        result.textContent = `Save failed: ${err.code || ""}\n${err.message || err}`;
+        const msg = encodeURIComponent(err?.message || String(err));
+        window.location.href = `results.html?status=fail&err=${msg}`;
       }
     }
 
-    // iPad Safari reliability: bind both
+    // iPad Safari reliability
     submitBtn.addEventListener("click", handleSubmit, { passive: false });
     submitBtn.addEventListener("touchend", handleSubmit, { passive: false });
   </script>
