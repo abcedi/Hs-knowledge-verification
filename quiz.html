@@ -1,8 +1,80 @@
 <!doctype html>
 <html>
-<head><meta charset="utf-8"><title>Quiz</title></head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HS Knowledge Quiz</title>
+</head>
 <body>
-  <h1>Quiz page is working ✅</h1>
-  <p>If you can see this after login, your badge login is done.</p>
+  <h1>Health & Safety Knowledge Check</h1>
+  <div id="quiz"></div>
+  <button id="submit">Submit</button>
+  <pre id="result"></pre>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const quizDiv = document.getElementById("quiz");
+    const result = document.getElementById("result");
+    let questions = [];
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) window.location.href = "index.html";
+      await loadQuiz();
+    });
+
+    async function loadQuiz() {
+      const res = await fetch("./data/questions.json");
+      questions = await res.json();
+
+      quizDiv.innerHTML = "";
+      questions.forEach((q, i) => {
+        const block = document.createElement("div");
+        block.style.marginBottom = "16px";
+        block.innerHTML = `
+          <p><strong>${i + 1}. ${q.question}</strong> <em>(${q.topic})</em></p>
+          ${q.choices.map((c, idx) =>
+            `<label>
+              <input type="radio" name="q${i}" value="${idx}">
+              ${c}
+            </label><br>`
+          ).join("")}
+        `;
+        quizDiv.appendChild(block);
+      });
+    }
+
+    document.getElementById("submit").onclick = async () => {
+      let score = 0;
+      const wrong = [];
+
+      questions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const chosen = selected ? Number(selected.value) : null;
+
+        if (chosen === q.answerIndex) score++;
+        else {
+          wrong.push({
+            questionId: q.id,
+            topic: q.topic,
+            chosenIndex: chosen,
+            correctIndex: q.answerIndex
+          });
+        }
+      });
+
+      await addDoc(collection(db, "attempts"), {
+        uid: auth.currentUser.uid,
+        score,
+        total: questions.length,
+        wrong,
+        createdAt: serverTimestamp()
+      });
+
+      result.textContent = `Saved ✅  Score: ${score} / ${questions.length}`;
+    };
+  </script>
 </body>
 </html>
