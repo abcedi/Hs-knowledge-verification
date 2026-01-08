@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Results</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Arial; padding: 18px; }
+    .box { padding: 14px; border: 1px solid #ccc; border-radius: 10px; }
+    a { display: inline-block; margin-top: 12px; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Results</h1>
+  <div class="box">
+    <pre id="out">Loading…</pre>
+  </div>
+  <a href="quiz.html">Take quiz again</a>
+
+  <script>
+    const out = document.getElementById("out");
+    const params = new URLSearchParams(window.location.search);
+
+    const status = params.get("status") || "unknown";
+    const score = params.get("score");
+    const total = params.get("total");
+    const wrong = params.get("wrong");
+    const err = params.get("err");
+
+    if (status === "ok") {
+      out.textContent = `Saved ✅\nScore: ${score} / ${total}\nWrong: ${wrong}`;
+    } else {
+      out.textContent = `Not saved ❌\n${err || "Unknown error"}`;
+    }
+  </script>
+</body>
+</html>
