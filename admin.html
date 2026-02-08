@@ -1,0 +1,388 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HS Quiz Admin Dashboard</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 18px;
+      font-family: system-ui, -apple-system, Arial;
+      background: #0f0f0f;
+      color: #fff;
+    }
+
+    h1 { margin: 0 0 12px 0; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .card {
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 12px;
+      background: #141414;
+      flex: 1 1 260px;
+      min-width: 260px;
+    }
+    .big { font-size: 22px; font-weight: 700; margin-top: 6px; }
+    .muted { opacity: 0.8; font-size: 13px; }
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid #444;
+      border-radius: 999px;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 12px 0;
+    }
+
+    input, select, button {
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: #111;
+      color: #fff;
+      outline: none;
+    }
+    button { cursor: pointer; background: #1e90ff; border: none; }
+    button.secondary { background: #333; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid #2a2a2a;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #222;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th { background: #151515; font-weight: 700; }
+    tr:hover td { background: #111; }
+
+    .ok { color: #67ff9b; }
+    .bad { color: #ff6b6b; }
+
+    .twoCol {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 900px) {
+      .twoCol { grid-template-columns: 1fr 1fr; }
+    }
+
+    #status { margin-top: 10px; white-space: pre-wrap; }
+    a { color: #7fb6ff; }
+  </style>
+</head>
+
+<body>
+  <h1>HS Quiz Admin Dashboard</h1>
+  <div class="muted">
+    This page reads Firestore collection <span class="pill">attempts</span> and summarizes misses by <span class="pill">topic</span> and <span class="pill">question</span>.
+  </div>
+
+  <div class="controls">
+    <input id="filterBadge" placeholder="Filter by badge (optional)" inputmode="numeric" />
+    <input id="filterName" placeholder="Filter by name (optional)" />
+    <select id="limit">
+      <option value="50">Last 50 attempts</option>
+      <option value="100" selected>Last 100 attempts</option>
+      <option value="200">Last 200 attempts</option>
+      <option value="500">Last 500 attempts</option>
+    </select>
+    <button id="refresh">Refresh</button>
+    <button id="signout" class="secondary">Log out</button>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <div class="muted">Attempts loaded</div>
+      <div class="big" id="kAttempts">—</div>
+    </div>
+    <div class="card">
+      <div class="muted">Average score</div>
+      <div class="big" id="kAvg">—</div>
+    </div>
+    <div class="card">
+      <div class="muted">Average wrong</div>
+      <div class="big" id="kAvgWrong">—</div>
+    </div>
+    <div class="card">
+      <div class="muted">Worst topic (most missed)</div>
+      <div class="big" id="kWorstTopic">—</div>
+    </div>
+  </div>
+
+  <div class="twoCol">
+    <div class="card">
+      <div class="muted">Most missed topics (train these first)</div>
+      <table id="topicTable">
+        <thead>
+          <tr><th>Topic</th><th>Misses</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="muted">Most missed questions (exact coaching targets)</div>
+      <table id="questionTable">
+        <thead>
+          <tr><th>Question</th><th>Topic</th><th>Misses</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="muted">Attempts (newest first)</div>
+    <table id="attemptTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Badge</th>
+          <th>Name</th>
+          <th>Restaurant</th>
+          <th>Score</th>
+          <th>Wrong</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="status" class="muted"></div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      collection,
+      getDocs,
+      query,
+      orderBy,
+      limit
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const statusEl = document.getElementById("status");
+
+    const kAttempts = document.getElementById("kAttempts");
+    const kAvg = document.getElementById("kAvg");
+    const kAvgWrong = document.getElementById("kAvgWrong");
+    const kWorstTopic = document.getElementById("kWorstTopic");
+
+    const topicBody = document.querySelector("#topicTable tbody");
+    const questionBody = document.querySelector("#questionTable tbody");
+    const attemptBody = document.querySelector("#attemptTable tbody");
+
+    const filterBadgeEl = document.getElementById("filterBadge");
+    const filterNameEl = document.getElementById("filterName");
+    const limitEl = document.getElementById("limit");
+
+    document.getElementById("refresh").onclick = () => loadAdmin();
+    document.getElementById("signout").onclick = async () => {
+      await signOut(auth);
+      location.href = "index.html";
+    };
+
+    function setStatus(msg) { statusEl.textContent = msg; }
+
+    function fmtDate(ts) {
+      try {
+        if (!ts) return "";
+        // Firestore Timestamp has .toDate()
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleString();
+      } catch {
+        return "";
+      }
+    }
+
+    // Load question text so "most missed questions" is human-readable
+    async function loadQuestionMap() {
+      const res = await fetch("./data/questions.json", { cache: "no-store" });
+      const data = await res.json();
+      const map = new Map();
+      for (const q of data) {
+        map.set(q.id, {
+          text: q.question || q.id,
+          topic: q.topic || "Uncategorized",
+          type: q.type || "mc"
+        });
+      }
+      return map;
+    }
+
+    function applyFilters(attempts) {
+      const badgeFilter = (filterBadgeEl.value || "").trim();
+      const nameFilter = (filterNameEl.value || "").trim().toLowerCase();
+
+      return attempts.filter(a => {
+        const badgeOk = !badgeFilter || String(a.badge || "").includes(badgeFilter);
+        const nameOk = !nameFilter || String(a.profile?.name || "").toLowerCase().includes(nameFilter);
+        return badgeOk && nameOk;
+      });
+    }
+
+    function buildRow(tds) {
+      const tr = document.createElement("tr");
+      for (const txt of tds) {
+        const td = document.createElement("td");
+        td.textContent = txt;
+        tr.appendChild(td);
+      }
+      return tr;
+    }
+
+    function renderTables(attempts, qMap) {
+      // Clear
+      topicBody.innerHTML = "";
+      questionBody.innerHTML = "";
+      attemptBody.innerHTML = "";
+
+      // Aggregate
+      const topicMisses = new Map();      // topic -> count
+      const questionMisses = new Map();   // questionId -> count
+
+      let totalScore = 0;
+      let totalTotal = 0;
+      let totalWrong = 0;
+
+      for (const a of attempts) {
+        const score = Number(a.score || 0);
+        const total = Number(a.total || 0);
+        const wrongCount = Array.isArray(a.wrong) ? a.wrong.length : Math.max(0, total - score);
+
+        totalScore += score;
+        totalTotal += total;
+        totalWrong += wrongCount;
+
+        // per attempt row
+        attemptBody.appendChild(buildRow([
+          fmtDate(a.createdAt),
+          String(a.badge || ""),
+          String(a.profile?.name || ""),
+          String(a.profile?.restaurant || ""),
+          `${score} / ${total}`,
+          String(wrongCount)
+        ]));
+
+        // aggregate wrong[]
+        if (Array.isArray(a.wrong)) {
+          for (const w of a.wrong) {
+            const topic = w.topic || qMap.get(w.questionId)?.topic || "Uncategorized";
+            const qid = w.questionId || "unknown";
+
+            topicMisses.set(topic, (topicMisses.get(topic) || 0) + 1);
+            questionMisses.set(qid, (questionMisses.get(qid) || 0) + 1);
+          }
+        }
+      }
+
+      // KPIs
+      kAttempts.textContent = String(attempts.length);
+
+      const avgPct = totalTotal ? Math.round((totalScore / totalTotal) * 100) : 0;
+      kAvg.textContent = totalTotal ? `${avgPct}%` : "—";
+
+      const avgWrong = attempts.length ? (totalWrong / attempts.length) : 0;
+      kAvgWrong.textContent = attempts.length ? avgWrong.toFixed(1) : "—";
+
+      // Worst topic
+      const worst = [...topicMisses.entries()].sort((a,b) => b[1] - a[1])[0];
+      kWorstTopic.textContent = worst ? `${worst[0]} (${worst[1]})` : "—";
+
+      // Topic table
+      const topTopics = [...topicMisses.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      for (const [topic, count] of topTopics) {
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td"); td1.textContent = topic;
+        const td2 = document.createElement("td"); td2.textContent = String(count);
+        tr.appendChild(td1); tr.appendChild(td2);
+        topicBody.appendChild(tr);
+      }
+      if (!topTopics.length) {
+        topicBody.appendChild(buildRow(["No data yet", "—"]));
+      }
+
+      // Question table (show text)
+      const topQs = [...questionMisses.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      for (const [qid, count] of topQs) {
+        const info = qMap.get(qid);
+        const qText = info?.text || qid;
+        const qTopic = info?.topic || "Uncategorized";
+
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td"); td1.textContent = qText;
+        const td2 = document.createElement("td"); td2.textContent = qTopic;
+        const td3 = document.createElement("td"); td3.textContent = String(count);
+        tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+        questionBody.appendChild(tr);
+      }
+      if (!topQs.length) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = "<td>No data yet</td><td>—</td><td>—</td>";
+        questionBody.appendChild(tr);
+      }
+    }
+
+    async function loadAdmin() {
+      setStatus("Loading…");
+
+      try {
+        // Must be logged in
+        if (!auth.currentUser) return;
+
+        const qMap = await loadQuestionMap();
+
+        const lim = Number(limitEl.value || 100);
+        const qy = query(collection(db, "attempts"), orderBy("createdAt", "desc"), limit(lim));
+        const snap = await getDocs(qy);
+
+        const raw = [];
+        snap.forEach(doc => raw.push(doc.data()));
+
+        const filtered = applyFilters(raw);
+
+        renderTables(filtered, qMap);
+        setStatus(`Loaded ${filtered.length} attempt(s).`);
+
+      } catch (e) {
+        setStatus(`Error ❌\n${e?.message || e}`);
+
+        // Most common issue: rules block reads
+        // This message helps you know what to tell me next
+        if ((e?.message || "").toLowerCase().includes("permission")) {
+          setStatus(
+            "Error ❌\nMissing/insufficient permissions.\n\nYour Firestore rules are blocking reads.\nTell me and I will give you the exact rules file to make YOU admin-only."
+          );
+        }
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        location.href = "index.html";
+        return;
+      }
+      await loadAdmin();
+    });
+  </script>
+</body>
+</html>
