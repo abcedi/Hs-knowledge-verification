@@ -14,7 +14,8 @@
       color: #fff;
     }
     h1 { margin: 0 0 14px 0; }
-    #quiz { padding-bottom: 120px; }
+    #quiz { padding-bottom: 140px; }
+
     .qblock {
       margin: 18px 0;
       padding-bottom: 14px;
@@ -26,6 +27,7 @@
       font-size: 0.9em;
       margin-top: 4px;
     }
+
     label {
       display: block;
       margin-top: 10px;
@@ -33,6 +35,19 @@
       line-height: 1.25;
     }
     input[type="radio"] { transform: scale(1.1); margin-right: 10px; }
+
+    .textInput {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+    }
 
     #submit {
       position: fixed;
@@ -91,12 +106,16 @@
 
     let questions = [];
 
-    // ---------- helpers ----------
     const setStatus = (t) => { statusEl.textContent = t; };
     const setMeta = (t) => { metaEl.textContent = t; };
 
+    function getBadgeFromUser(user) {
+      const email = user?.email || "";
+      const badge = email.includes("@") ? email.split("@")[0] : "";
+      return badge;
+    }
+
     async function loadQuiz() {
-      // no-store helps iPad Safari caching issues
       const res = await fetch("./data/questions.json", { cache: "no-store" });
       const data = await res.json();
 
@@ -107,57 +126,114 @@
       questions = data;
 
       quizDiv.innerHTML = "";
+
       questions.forEach((q, i) => {
         const block = document.createElement("div");
         block.className = "qblock";
 
-        // Support BOTH formats:
-        // - choices (recommended)
-        // - choices array OR "choices" field in your JSON
-        const choices = Array.isArray(q.choices) ? q.choices : [];
+        const qType = q.type || (Array.isArray(q.choices) ? "mc" : "mc");
+        const topic = q.topic || "Uncategorized";
+        const prompt = q.question || "(missing question text)";
 
-        block.innerHTML = `
+        let inner = `
           <div>
-            <strong>${i + 1}. ${q.question || "(missing question text)"}</strong>
-            <div class="topic">(${q.topic || "Uncategorized"})</div>
+            <strong>${i + 1}. ${prompt}</strong>
+            <div class="topic">(${topic})</div>
           </div>
-          ${choices.map((c, idx) => `
+        `;
+
+        if (qType === "text") {
+          inner += `
+            <input
+              class="textInput"
+              type="text"
+              id="t${i}"
+              placeholder="Type your answer…"
+              ${q.required ? "required" : ""}
+            />
+          `;
+        } else {
+          const choices = Array.isArray(q.choices) ? q.choices : [];
+          inner += choices.map((c, idx) => `
             <label>
               <input type="radio" name="q${i}" value="${idx}">
               ${c}
             </label>
-          `).join("")}
-        `;
+          `).join("");
+        }
 
+        block.innerHTML = inner;
         quizDiv.appendChild(block);
       });
 
-      setMeta(`Questions: ${questions.length}`);
+      const scoredCount = questions.filter(q => (q.scored !== false) && (q.type !== "text")).length;
+      setMeta(`Questions: ${questions.length} | Scored: ${scoredCount}`);
     }
 
-    function collectResults() {
+    function collectAllAnswers() {
+      const answers = [];
+      const profile = {};
       let score = 0;
+      let scoredTotal = 0;
       const wrong = [];
 
-      questions.forEach((q, i) => {
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        const qType = q.type || (Array.isArray(q.choices) ? "mc" : "mc");
+
+        if (qType === "text") {
+          const el = document.getElementById(`t${i}`);
+          const val = (el?.value || "").trim();
+
+          if (q.required && !val) {
+            return { error: `Please complete: "${q.question}"` };
+          }
+
+          answers.push({
+            id: q.id || `t_${i+1}`,
+            type: "text",
+            value: val
+          });
+
+          // store known fields neatly
+          if (q.id === "meta_name") profile.name = val;
+          if (q.id === "meta_restaurant") profile.restaurant = val;
+
+          continue;
+        }
+
         const selected = document.querySelector(`input[name="q${i}"]:checked`);
         const chosen = selected ? Number(selected.value) : null;
 
-        const correct = Number(q.answerIndex);
-
-        if (chosen === correct) {
-          score++;
-        } else {
-          wrong.push({
-            questionId: q.id || `q_${i + 1}`,
-            topic: q.topic || "Uncategorized",
-            chosenIndex: chosen,
-            correctIndex: correct
-          });
+        if (chosen === null) {
+          return { error: `Please answer question ${i + 1}.` };
         }
-      });
 
-      return { score, total: questions.length, wrong };
+        answers.push({
+          id: q.id || `q_${i+1}`,
+          type: "mc",
+          chosenIndex: chosen
+        });
+
+        const isScored = (q.scored !== false);
+        if (isScored) {
+          scoredTotal++;
+          const correct = Number(q.answerIndex);
+
+          if (chosen === correct) {
+            score++;
+          } else {
+            wrong.push({
+              questionId: q.id || `q_${i + 1}`,
+              topic: q.topic || "Uncategorized",
+              chosenIndex: chosen,
+              correctIndex: correct
+            });
+          }
+        }
+      }
+
+      return { profile, answers, score, total: scoredTotal, wrong };
     }
 
     function withTimeout(promise, ms) {
@@ -169,7 +245,6 @@
       ]);
     }
 
-    // ---------- auth gate ----------
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
@@ -185,11 +260,9 @@
       }
     });
 
-    // ---------- submit ----------
     async function handleSubmit(e) {
       e.preventDefault();
 
-      // Visual feedback immediately (so you know the tap registered)
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting…";
       setStatus("Submitting…");
@@ -204,36 +277,38 @@
           return;
         }
 
-        const { score, total, wrong } = collectResults();
+        const collected = collectAllAnswers();
+        if (collected.error) {
+          throw new Error(collected.error);
+        }
 
-        // Save attempt (timeout prevents infinite hang)
+        const badge = getBadgeFromUser(auth.currentUser);
+
         await withTimeout(
           addDoc(collection(db, "attempts"), {
             uid: auth.currentUser.uid,
-            score,
-            total,
-            wrong,
+            badge,
+            profile: collected.profile,
+            answers: collected.answers,
+            score: collected.score,
+            total: collected.total,
+            wrong: collected.wrong,
             createdAt: serverTimestamp()
           }),
-          8000
+          12000
         );
 
-        // Redirect so user always sees a clear outcome
-        // (Make sure results.html exists in repo root)
         window.location.href =
-          `results.html?status=ok&score=${encodeURIComponent(score)}&total=${encodeURIComponent(total)}&wrong=${encodeURIComponent(wrong.length)}`;
+          `results.html?status=ok&score=${encodeURIComponent(collected.score)}&total=${encodeURIComponent(collected.total)}&wrong=${encodeURIComponent(collected.wrong.length)}`;
 
       } catch (err) {
         const msg = err?.message || String(err);
-
-        // Show error and allow retry
         setStatus(`Not saved ❌\n${msg}\n\nFix the issue and press Submit again.`);
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit";
       }
     }
 
-    // iPad Safari reliability: bind both click + touchend
     submitBtn.addEventListener("click", handleSubmit, { passive: false });
     submitBtn.addEventListener("touchend", handleSubmit, { passive: false });
   </script>
