@@ -1,13 +1,418 @@
 [
   {
-    "id": "incident_001",
-    "topic": "Incident Reporting",
-    "question": "When must a workplace incident be reported?",
+    "id": "meta_name",
+    "topic": "Admin",
+    "type": "text",
+    "question": "Name (First & Last Name)",
+    "required": true,
+    "scored": false
+  },
+  {
+    "id": "meta_restaurant",
+    "topic": "Admin",
+    "type": "text",
+    "question": "Restaurant Name",
+    "required": true,
+    "scored": false
+  },
+
+  {
+    "id": "harassment_001",
+    "topic": "Bullying & Harassment",
+    "type": "mc",
+    "question": "In the context of McDonald’s harassment policy, which scenario would NOT be considered harassment?",
     "choices": [
-      "End of shift",
-      "Immediately",
-      "Within 24 hours",
-      "Only if medical aid is needed"
+      "A manager repeatedly criticizes an employee’s performance in front of others.",
+      "An employee makes unwelcome comments about a colleague’s gender identity.",
+      "A supervisor gives constructive feedback during a performance review.",
+      "A team member posts offensive memes targeting a coworker on social media."
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "harassment_002",
+    "topic": "Bullying & Harassment",
+    "type": "mc",
+    "question": "What is the correct protocol if an employee wishes to report harassment but feels uncomfortable speaking to their manager?",
+    "choices": [
+      "Submit the complaint anonymously via the company website.",
+      "Contact the Ministry of Labour directly.",
+      "Reach out to their HR business partner, Safety & Security representative, or use the PAL program.",
+      "Wait for the next scheduled committee meeting to raise the issue."
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "harassment_003",
+    "topic": "Bullying & Harassment",
+    "type": "mc",
+    "question": "If a General Manager is the alleged harasser, which reporting path is appropriate according to the procedure?",
+    "choices": [
+      "Report only to the PAL hotline.",
+      "Submit the complaint anonymously via social media.",
+      "Contact the Market People Lead, Operations Consultant, or HR Consultant.",
+      "Wait until the annual review to raise the issue."
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "harassment_004",
+    "topic": "Bullying & Harassment",
+    "type": "mc",
+    "question": "Which of the following is a responsibility of shift managers under the bullying and harassment prevention procedure?",
+    "choices": [
+      "Only report incidents if they personally witness them.",
+      "Avoid involvement in investigations.",
+      "Delegate all training responsibilities to HR.",
+      "Promote reporting processes and assist in investigations when required."
+    ],
+    "answerIndex": 3
+  },
+
+  {
+    "id": "refusal_001",
+    "topic": "Work Refusal",
+    "type": "mc",
+    "question": "What is the correct protocol when a worker refuses to perform a task due to a perceived safety hazard?",
+    "choices": [
+      "The worker must wait for the next committee meeting to report the concern.",
+      "The shift manager must investigate with the worker and a committee member, and escalate if unresolved.",
+      "The worker must immediately notify the provincial safety agency.",
+      "The shift manager must discipline the worker for non-compliance."
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "hsc_001",
+    "topic": "Health & Safety Committee",
+    "type": "mc",
+    "question": "What is the minimum composition requirement for a Health and Safety Committee in McOpCo restaurants?",
+    "choices": [
+      "Two members, both selected by management.",
+      "Four members, with at least one external safety consultant.",
+      "Four members, with half being crew representatives selected by their peers.",
+      "Three members, with one representative from each shift.",
+      "None of the above"
+    ],
+    "answerIndex": 2
+  },
+
+  {
+    "id": "alarm_001",
+    "topic": "Emergency Response",
+    "type": "mc",
+    "question": "What is the correct action for a Shift Manager when a CO₂ HIGH Alarm is triggered and the white strobe is flashing?",
+    "choices": [
+      "Investigate the source of the alarm before taking action.",
+      "Continue operations unless smoke is visible.",
+      "Follow the evacuation procedure immediately.",
+      "Call maintenance to reset the alarm."
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "evac_001",
+    "topic": "Emergency Response",
+    "type": "mc",
+    "question": "What must be done when an employee requires accommodation during emergency evacuations due to a disability?",
+    "choices": [
+      "Assign them a buddy from the crew.",
+      "Exclude them from evacuation drills.",
+      "Prepare an individualized workplace emergency response plan.",
+      "Notify emergency services in advance."
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "exposure_001",
+    "topic": "Exposure Control",
+    "type": "mc",
+    "question": "What is the correct immediate response if a shift manager is exposed to a used syringe injury?",
+    "choices": [
+      "Squeeze the wound to remove contaminants.",
+      "Wash the area with soap and water and continue working.",
+      "Allow the wound to bleed freely for 15 minutes, then seek medical attention.",
+      "Apply disinfectant and bandage the area."
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "youth_001",
+    "topic": "Exposure Control",
+    "type": "mc",
+    "question": "Which of the following tasks is not permitted for crew members under 18 according to the Exposure Control Plan?",
+    "choices": [
+      "Garbage disposal using gloves.",
+      "Cleaning a toilet overflow.",
+      "Handwashing after handling food.",
+      "Non-food surface disinfection."
+    ],
+    "answerIndex": 1
+  },
+
+  {
+    "id": "whmis_001",
+    "topic": "WHMIS 2015",
+    "type": "mc",
+    "question": "Under what condition is a workplace label required according to WHMIS 2015 guidelines?",
+    "choices": [
+      "When a product is used for the first time.",
+      "When a hazardous product is decanted into another container.",
+      "When a product is stored in a locked cabinet.",
+      "When a product is used by a contractor."
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "whmis_002",
+    "topic": "WHMIS 2015",
+    "type": "mc",
+    "question": "What are employees expected to know after completing WHMIS 2015 training?",
+    "choices": [
+      "How to dispose of all restaurant waste.",
+      "The chemical composition of cleaning products.",
+      "The hazards of products, protection methods, emergency actions, and where to find more information.",
+      "The procurement process for new materials.",
+      "None of the above"
+    ],
+    "answerIndex": 2
+  },
+
+  {
+    "id": "heat_001",
+    "topic": "Heat Stress",
+    "type": "mc",
+    "question": "What is the recommended water intake for employees working in high heat conditions, according to the plan?",
+    "choices": [
+      "250 ml every 30 minutes",
+      "1 litre every 2 hours",
+      "1 litre every hour, not just during breaks",
+      "Only when feeling thirsty"
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "heat_002",
+    "topic": "Heat Stress",
+    "type": "mc",
+    "question": "Under what condition should the Shift Leader begin recording temperature and humidity readings?",
+    "choices": [
+      "When the thermostat reaches 24°C.",
+      "When the indoor humidex reaches 30°C.",
+      "When an employee reports symptoms of heat stress.",
+      "When HVAC maintenance is scheduled."
+    ],
+    "answerIndex": 1
+  },
+
+  {
+    "id": "training_001",
+    "topic": "Training & Return to Work",
+    "type": "mc",
+    "question": "What is the correct protocol if an employee has been off work for more than one year?",
+    "choices": [
+      "Resume regular duties immediately.",
+      "Complete Meet McDonald’s Onboarding Chapter 4 and Crew Academy The Crew Guide to Safety, Security, & You.",
+      "Submit a new employment application.",
+      "Skip training if previously certified."
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "rtw_001",
+    "topic": "Training & Return to Work",
+    "type": "mc",
+    "question": "What is the correct protocol if an employee is medically required to work modified duties upon returning to the restaurant?",
+    "choices": [
+      "Assign modified duties without documentation and monitor performance.",
+      "Require the employee to complete refresher training only if they request it.",
+      "Review the Fitness to Work form, accommodate duties, and communicate the plan to all Shift Leaders.",
+      "Refer the employee to Human Resources and delay return until full recovery."
+    ],
+    "answerIndex": 2
+  },
+
+  {
+    "id": "security_001",
+    "topic": "Security & Violence Prevention",
+    "type": "mc",
+    "question": "What is the purpose of the Restaurant Specific Physical Environment Risk Assessment?",
+    "choices": [
+      "To evaluate employee satisfaction with safety policies.",
+      "To assess and document physical security measures and identify needed controls.",
+      "To determine which employees require additional training.",
+      "To audit financial losses due to violence."
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "security_002",
+    "topic": "Security & Violence Prevention",
+    "type": "mc",
+    "question": "What is the correct reporting protocol when a Shift Leader makes a 911 call due to a violent incident?",
+    "choices": [
+      "Notify the Security Manager within 48 hours.",
+      "Report only to the General Manager.",
+      "Notify the General Manager and Operations Consultant immediately.",
+      "Submit a written report to the Health & Safety Committee."
+    ],
+    "answerIndex": 2
+  },
+
+  {
+    "id": "swp_001",
+    "topic": "Safe Work Procedures",
+    "type": "mc",
+    "question": "When cleaning the Tomato Saber slicer, which part must not be removed according to the Safe Work Procedure?",
+    "choices": [
+      "The tomato catcher",
+      "The blade cartridge",
+      "The table stop",
+      "The pusher handle"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "swp_002",
+    "topic": "Safe Work Procedures",
+    "type": "mc",
+    "question": "When removing wares from the Spectank, what is the correct action if the water level is found to be one inch below the marked line?",
+    "choices": [
+      "Drain the tank and refill it completely.",
+      "Add water until it reaches the water level mark.",
+      "Leave it as is and continue using the tank.",
+      "Report the issue to maintenance."
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "swp_003",
+    "topic": "PPE & Hygiene",
+    "type": "mc",
+    "question": "According to the glove removal procedure, what should be done with the first glove after it is removed?",
+    "choices": [
+      "Discard it immediately in the nearest trash bin.",
+      "Hold it in the ungloved hand until both gloves are removed.",
+      "Place it inside the second glove during removal.",
+      "Sanitize it for reuse."
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "swp_004",
+    "topic": "PPE & Hygiene",
+    "type": "mc",
+    "question": "What is the correct method for handling broken glass found in garbage, as outlined in the Garbage Disposal procedure?",
+    "choices": [
+      "Use bare hands with caution.",
+      "Use tongs, tweezers, or a brush and dustpan.",
+      "Push it down with a trash masher.",
+      "Leave it in the bin for maintenance to handle."
+    ],
+    "answerIndex": 1
+  },
+
+  {
+    "id": "provost_001",
+    "topic": "Provost H&S Info",
+    "type": "mc",
+    "question": "Where is the Health and Safety Program and Policies binder located (Provost store)?",
+    "choices": [
+      "Drive-thru cash booth",
+      "Manager’s office in the basement (blue binder)",
+      "Crew room by the lockers",
+      "Kitchen office by the fry station"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "provost_002",
+    "topic": "Provost H&S Info",
+    "type": "mc",
+    "question": "Where can you find Safe Work Practices (SWP) and Risk Assessments for coaching/training (Provost store)?",
+    "choices": [
+      "Only in the online crew app",
+      "In the blue Health and Safety Program and Policies binder under the Safe Work Practices tab",
+      "Posted on the front counter bulletin board",
+      "In the maintenance log book"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "provost_003",
+    "topic": "Emergency Response",
+    "type": "mc",
+    "question": "Where is the store assembly point (Provost store) during an evacuation?",
+    "choices": [
+      "Front counter entrance",
+      "Back door by the loading area",
+      "Far east of the parking lot by the cardboard box bin",
+      "In the lobby near the washrooms"
+    ],
+    "answerIndex": 2
+  },
+  {
+    "id": "provost_004",
+    "topic": "OHSA",
+    "type": "mc",
+    "question": "Where is the OHSA / legislation binder located (Provost store)?",
+    "choices": [
+      "Manager’s office",
+      "Break room beside the TV (Program and Policies binder area)",
+      "Crew room by the time clock",
+      "Drive-thru office"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "provost_005",
+    "topic": "SDS",
+    "type": "mc",
+    "question": "How do you access McDonald’s SDS at Provost?",
+    "choices": [
+      "Ask maintenance to print them",
+      "Scan the SDS QR code posted on the H&S board in the basement (Safety Notice sheet) and log in",
+      "Use the lobby kiosk menu",
+      "Email head office for SDS"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "provost_006",
+    "topic": "SDS",
+    "type": "mc",
+    "question": "What are the SDS login credentials listed on the Safety Notice sheet?",
+    "choices": [
+      "Username: crew  Password: safety",
+      "Username: mcd  Password: sds",
+      "Username: provost  Password: 1125",
+      "Username: admin  Password: admin"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "provost_007",
+    "topic": "SDS",
+    "type": "mc",
+    "question": "What is an SDS used for?",
+    "choices": [
+      "To schedule staff shifts",
+      "To list chemical hazards, PPE, first aid steps, and safe handling/storage instructions",
+      "To track food waste",
+      "To log sales and inventory"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "provost_008",
+    "topic": "Emergency Response",
+    "type": "mc",
+    "question": "Which sequence best matches the evacuation process listed in your training guide?",
+    "choices": [
+      "Evacuate → Call 911 → Headcount → Notify guests",
+      "Recognize emergency → Notify guests/employees → Call 911 → Evacuate → Headcount at assembly point",
+      "Call 911 → Continue operations → Investigate → Evacuate if needed",
+      "Notify guests → Lock doors → Wait for instructions → Headcount"
     ],
     "answerIndex": 1
   }
