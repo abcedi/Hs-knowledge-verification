@@ -4,27 +4,112 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>HS Quiz Login</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 18px;
+      font-family: system-ui, -apple-system, Arial;
+      background: #0f0f0f;
+      color: #fff;
+    }
+
+    h1 {
+      margin: 0 0 16px 0;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .card {
+      max-width: 420px;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .field {
+      margin-top: 12px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid #333;
+      background: #0f0f0f;
+      color: #fff;
+      outline: none;
+    }
+
+    input::placeholder {
+      color: #888;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    #login {
+      background: #1e90ff;
+      color: #fff;
+    }
+
+    #logout {
+      background: #333;
+      color: #fff;
+    }
+
+    #out {
+      margin-top: 12px;
+      white-space: pre-wrap;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .muted {
+      opacity: 0.75;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+  </style>
 </head>
+
 <body>
   <h1>Health & Safety Knowledge Check</h1>
 
-  <input
-    id="badge"
-    inputmode="numeric"
-    placeholder="7-digit badge number"
-  />
+  <div class="card">
+    <div class="field">
+      <input
+        id="badge"
+        inputmode="numeric"
+        placeholder="7-digit badge number"
+      />
+    </div>
 
-  <input
-    id="pin"
-    type="password"
-    inputmode="numeric"
-    placeholder="4-digit PIN"
-  />
+    <div class="field">
+      <input
+        id="pin"
+        type="password"
+        inputmode="numeric"
+        placeholder="4-digit PIN"
+      />
+    </div>
 
-  <button id="login">Log in</button>
-  <button id="logout">Log out</button>
+    <button id="login">Log in</button>
+    <button id="logout">Log out</button>
 
-  <pre id="out"></pre>
+    <div id="out" class="muted"></div>
+  </div>
 
   <script type="module">
     import { auth } from "./firebase.js";
@@ -44,26 +129,30 @@
 
     function toEmailFromBadge(badge) {
       const clean = (badge || "").trim();
-      if (!/^\d{7}$/.test(clean)) return null; // 🔒 EXACTLY 7 digits
+      if (!/^\d{7}$/.test(clean)) return null;
       return `${clean}@hsquiz.local`;
     }
+
     function pinToPassword(pin) {
-      // Firebase requires at least 6 characters
-      return `hs-${pin}`; // example: 1234 → hs-1234
+      return `hs-${pin}`; // Firebase requires 6+ chars
     }
+
     document.getElementById("login").onclick = async () => {
       const email = toEmailFromBadge(badgeEl.value);
       const rawPin = (pinEl.value || "").trim();
 
+      if (!email) return log("Badge must be exactly 7 digits.");
       if (!/^\d{4}$/.test(rawPin)) return log("PIN must be exactly 4 digits.");
 
-      const pin = pinToPassword(rawPin);
-
       try {
-        const cred = await signInWithEmailAndPassword(auth, email, pin);
-        log(`Logged in as badge ${badgeEl.value}`);
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          pinToPassword(rawPin)
+        );
+        log("Logged in ✓");
         window.location.href = "quiz.html";
-      } catch (e) {
+      } catch {
         pinEl.value = "";
         log("Invalid badge or PIN.");
       }
