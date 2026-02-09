@@ -15,17 +15,8 @@
       color: #fff;
     }
 
-    .wrap {
-      max-width: 520px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      margin: 24px 0 16px 0;
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-    }
+    .wrap { max-width: 520px; margin: 0 auto; }
+    h1 { margin: 24px 0 16px 0; font-size: 30px; font-weight: 800; }
 
     .card {
       background: #141414;
@@ -36,16 +27,26 @@
       width: 100%;
     }
 
-    .field {
-      margin-top: 12px;
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
     }
 
-    label {
-      display: block;
-      font-size: 13px;
-      opacity: 0.75;
-      margin-bottom: 8px;
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border: 1px solid #444;
+      border-radius: 999px;
+      font-size: 12px;
+      opacity: 0.95;
     }
+
+    .field { margin-top: 12px; }
+    label { display: block; font-size: 13px; opacity: 0.75; margin-bottom: 8px; }
 
     input {
       width: 100%;
@@ -58,7 +59,6 @@
       color: #fff;
       outline: none;
     }
-
     input::placeholder { color: #888; }
 
     .btn {
@@ -73,11 +73,9 @@
       cursor: pointer;
       touch-action: manipulation;
     }
-
-    .btn-primary {
-      background: #1e90ff;
-      color: #fff;
-    }
+    .btn-primary { background: #1e90ff; color: #fff; }
+    .btn-secondary { background: #333; color: #fff; }
+    .btn-admin { background: #222; color: #fff; border: 1px solid #333; }
 
     .row {
       display: flex;
@@ -86,17 +84,6 @@
       margin-top: 12px;
       gap: 12px;
       flex-wrap: wrap;
-    }
-
-    .linkbtn {
-      background: transparent;
-      border: none;
-      color: #bbb;
-      padding: 0;
-      font-size: 14px;
-      cursor: pointer;
-      text-decoration: underline;
-      text-underline-offset: 3px;
     }
 
     .helper {
@@ -119,6 +106,15 @@
     <h1>Health & Safety Knowledge Check</h1>
 
     <div class="card">
+      <div class="row-top">
+        <div class="pill" id="authState">Checking login…</div>
+
+        <!-- Admin Dashboard button (always visible) -->
+        <button id="adminBtn" class="btn btn-admin" style="width:auto; padding:10px 12px; margin-top:0;">
+          Admin Dashboard
+        </button>
+      </div>
+
       <div class="field">
         <label for="badge">Badge number</label>
         <input id="badge" inputmode="numeric" placeholder="7-digit badge number" />
@@ -131,12 +127,16 @@
 
       <button id="login" class="btn btn-primary">Log in</button>
 
+      <button id="goQuiz" class="btn btn-secondary" style="display:none;">Go to Quiz</button>
+
       <div class="row">
         <div class="helper">
           Forgot PIN? Contact H&amp;S / your manager to reset it.
         </div>
 
-        <button id="logout" class="linkbtn" type="button">Log out</button>
+        <button id="logout" class="btn btn-secondary" style="width:auto; padding:10px 12px; margin-top:0;">
+          Log out
+        </button>
       </div>
 
       <div id="out"></div>
@@ -154,6 +154,9 @@
     const badgeEl = document.getElementById("badge");
     const pinEl = document.getElementById("pin");
     const out = document.getElementById("out");
+    const authState = document.getElementById("authState");
+    const goQuizBtn = document.getElementById("goQuiz");
+    const adminBtn = document.getElementById("adminBtn");
 
     function log(msg) { out.textContent = msg; }
 
@@ -164,8 +167,7 @@
     }
 
     function pinToPassword(pin) {
-      // Firebase requires 6+ chars
-      return `hs-${pin}`;
+      return `hs-${pin}`; // Firebase requires 6+ chars
     }
 
     document.getElementById("login").onclick = async () => {
@@ -178,20 +180,37 @@
       try {
         await signInWithEmailAndPassword(auth, email, pinToPassword(rawPin));
         log("Logged in ✓");
-        window.location.href = "quiz.html";
+        goQuizBtn.style.display = "block";
       } catch {
         pinEl.value = "";
         log("Invalid badge or PIN.");
       }
     };
 
+    goQuizBtn.onclick = () => {
+      window.location.href = "quiz.html";
+    };
+
+    // Admin button link
+    // If your admin file is named differently, change "admin.html"
+    adminBtn.onclick = () => {
+      window.location.href = "admin.html";
+    };
+
     document.getElementById("logout").onclick = async () => {
       await signOut(auth);
       log("Logged out.");
+      goQuizBtn.style.display = "none";
     };
 
     onAuthStateChanged(auth, (user) => {
-      if (user) window.location.href = "quiz.html";
+      if (user) {
+        authState.textContent = "Logged in ✓";
+        goQuizBtn.style.display = "block";
+      } else {
+        authState.textContent = "Not logged in";
+        goQuizBtn.style.display = "none";
+      }
     });
   </script>
 </body>
