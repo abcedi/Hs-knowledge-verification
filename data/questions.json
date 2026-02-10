@@ -296,7 +296,7 @@
       "Place it inside the second glove during removal.",
       "Sanitize it for reuse."
     ],
-    "answerIndex": 1
+    "answerIndex": 2
   },
   {
     "id": "swp_004",
@@ -316,12 +316,12 @@
     "id": "provost_001",
     "topic": "Provost H&S Info",
     "type": "mc",
-    "question": "Where is the Health and Safety Program and Policies binder located (Provost store)?",
+    "question": "Where is the Health and Safety Program and Policies binder located?",
     "choices": [
-      "Drive-thru cash booth",
-      "Manager’s office in the basement (blue binder)",
-      "Crew room by the lockers",
-      "Kitchen office by the fry station"
+      "Cash Office",
+      "Manager’s office in the basement",
+      "Break room by the TV",
+      "Stephen's Office"
     ],
     "answerIndex": 1
   },
@@ -331,10 +331,10 @@
     "type": "mc",
     "question": "Where can you find Safe Work Practices (SWP) and Risk Assessments for coaching/training (Provost store)?",
     "choices": [
-      "Only in the online crew app",
-      "In the blue Health and Safety Program and Policies binder under the Safe Work Practices tab",
-      "Posted on the front counter bulletin board",
-      "In the maintenance log book"
+      "Only online(@MCD)",
+      "In the blue Health and Safety Program and Policies binder under the Safe Work Practices & Risk Assessments tab",
+      "Posted on the Health and Safety Bulletin board",
+      "In the cash office"
     ],
     "answerIndex": 1
   },
@@ -342,12 +342,12 @@
     "id": "provost_003",
     "topic": "Emergency Response",
     "type": "mc",
-    "question": "Where is the store assembly point (Provost store) during an evacuation?",
+    "question": "Where is the store assembly point during a Fire evacuation?",
     "choices": [
       "Front counter entrance",
       "Back door by the loading area",
       "Far east of the parking lot by the cardboard box bin",
-      "In the lobby near the washrooms"
+      "TD Bank"
     ],
     "answerIndex": 2
   },
@@ -355,12 +355,12 @@
     "id": "provost_004",
     "topic": "OHSA",
     "type": "mc",
-    "question": "Where is the OHSA / legislation binder located (Provost store)?",
+    "question": "Where is the OHSA / legislation QR code binder located?",
     "choices": [
       "Manager’s office",
       "Break room beside the TV (Program and Policies binder area)",
-      "Crew room by the time clock",
-      "Drive-thru office"
+      "Meeting Room",
+      "Cash Office"
     ],
     "answerIndex": 1
   },
@@ -413,6 +413,45 @@
       "Recognize emergency → Notify guests/employees → Call 911 → Evacuate → Headcount at assembly point",
       "Call 911 → Continue operations → Investigate → Evacuate if needed",
       "Notify guests → Lock doors → Wait for instructions → Headcount"
+    ],
+    "answerIndex": 1
+  },
+  {
+    "id": "provost_009",
+    "topic": "Safety Talk",
+    "type": "mc",
+    "question": "What is the current month's Safety Talk?",
+    "choices": [
+      "Good Gravy- It's Hot!",
+      "Don't Let a Slip Flip Your Day!",
+      "Master Hot Surfaces Without Leaving a Trace",
+      "Understanding Your Legislative Rights"
+    ],
+    "answerIndex": 0
+  },
+  {
+    "id": "provost_010",
+    "topic": "Safety Talk",
+    "type": "mc",
+    "question": "What information can we take from the current month's Safety Talk?",
+    "choices": [
+      "What does the Right to Participate allow workers to do?",
+      "What are a couple things that can cause slips, trips, or falls?",
+      "What are some things that can help prevent slips, trips, or falls?",
+      "How can we avoid gravy burns?"
+    ],
+    "answerIndex": 3
+  },
+  {
+    "id": "provost_011",
+    "topic": "HSC",
+    "type": "mc",
+    "question": "Who is a part of Provost's Health and Safety Committee?",
+    "choices": [
+      "MGR Co-Chair:Stephen, MGR Member:Abcedi, Crew Co-Chair:Jerome ,and Crew Member:Gurpreet?",
+      "MGR Co-Chair:Abcedi, MGR Member:Stephen, Crew Co-Chair:Jerome ,and Crew Member:Gurpreet?",
+      "MGR Co-Chair:Abcedi, MGR Member:Flery, Crew Co-Chair:Gurpreet ,and Crew Member:Jerome?",
+      "MGR Co-Chair:Varun, MGR Member:Abcedi, Crew Co-Chair:Jerome ,and Crew Member:Gurpreet??"
     ],
     "answerIndex": 1
   }
