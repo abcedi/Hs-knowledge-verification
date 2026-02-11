@@ -13,7 +13,8 @@
       background: #0f0f0f;
       color: #fff;
     }
-    h1 { margin: 0 0 14px 0; }
+    h1 { margin: 0 0 10px 0; }
+    .subtitle { opacity: 0.75; margin-bottom: 12px; }
     #quiz { padding-bottom: 140px; }
 
     .qblock {
@@ -105,7 +106,8 @@
     const statusEl = document.getElementById("status");
     const metaEl = document.getElementById("meta");
 
-    let questions = [];
+    // This becomes the rendered, randomized list (do NOT use raw JSON after shuffle)
+    let renderedQuestions = [];
 
     const setStatus = (t) => { statusEl.textContent = t; };
     const setMeta = (t) => { metaEl.textContent = t; };
@@ -116,6 +118,53 @@
       return badge;
     }
 
+    // ---------- random helpers ----------
+    function shuffle(arr) {
+      // Fisher-Yates
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function randomizeQuestions(raw) {
+      // Keep text meta questions at the top
+      const meta = raw.filter(q => q.type === "text");
+      const others = raw.filter(q => q.type !== "text");
+
+      // Shuffle the non-text questions
+      shuffle(others);
+
+      // For each MC question, shuffle its choices AND remap answerIndex
+      const randomized = others.map((q) => {
+        if (q.type !== "mc" || !Array.isArray(q.choices)) return q;
+
+        // Build pairs so we can remap correct answer after shuffling
+        const paired = q.choices.map((choiceText, idx) => ({
+          choiceText,
+          originalIndex: idx
+        }));
+
+        shuffle(paired);
+
+        const newChoices = paired.map(p => p.choiceText);
+
+        // Find where the original correct answer moved to
+        const originalCorrect = Number(q.answerIndex);
+        const newAnswerIndex = paired.findIndex(p => p.originalIndex === originalCorrect);
+
+        return {
+          ...q,
+          choices: newChoices,
+          answerIndex: newAnswerIndex
+        };
+      });
+
+      // Final list: meta first, then randomized
+      return [...meta, ...randomized];
+    }
+
     async function loadQuiz() {
       const res = await fetch("./data/questions.json", { cache: "no-store" });
       const data = await res.json();
@@ -124,15 +173,16 @@
         throw new Error("questions.json must be an array of questions.");
       }
 
-      questions = data;
+      // Create randomized render list
+      renderedQuestions = randomizeQuestions(data);
 
       quizDiv.innerHTML = "";
 
-      questions.forEach((q, i) => {
+      renderedQuestions.forEach((q, i) => {
         const block = document.createElement("div");
         block.className = "qblock";
 
-        const qType = q.type || (Array.isArray(q.choices) ? "mc" : "mc");
+        const qType = q.type || "mc";
         const topic = q.topic || "Uncategorized";
         const prompt = q.question || "(missing question text)";
 
@@ -167,8 +217,8 @@
         quizDiv.appendChild(block);
       });
 
-      const scoredCount = questions.filter(q => (q.scored !== false) && (q.type !== "text")).length;
-      setMeta(`Questions: ${questions.length} | Scored: ${scoredCount}`);
+      const scoredCount = renderedQuestions.filter(q => (q.scored !== false) && (q.type !== "text")).length;
+      setMeta(`Questions: ${renderedQuestions.length} | Scored: ${scoredCount}`);
     }
 
     function collectAllAnswers() {
@@ -178,9 +228,9 @@
       let scoredTotal = 0;
       const wrong = [];
 
-      for (let i = 0; i < questions.length; i++) {
-        const q = questions[i];
-        const qType = q.type || (Array.isArray(q.choices) ? "mc" : "mc");
+      for (let i = 0; i < renderedQuestions.length; i++) {
+        const q = renderedQuestions[i];
+        const qType = q.type || "mc";
 
         if (qType === "text") {
           const el = document.getElementById(`t${i}`);
@@ -196,7 +246,6 @@
             value: val
           });
 
-          // store known fields neatly
           if (q.id === "meta_name") profile.name = val;
           if (q.id === "meta_restaurant") profile.restaurant = val;
 
