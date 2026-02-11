@@ -448,10 +448,10 @@
     "type": "mc",
     "question": "Who is a part of Provost's Health and Safety Committee?",
     "choices": [
-      "MGR Co-Chair:Stephen, MGR Member:Abcedi, Crew Co-Chair:Jerome ,and Crew Member:Gurpreet?",
-      "MGR Co-Chair:Abcedi, MGR Member:Stephen, Crew Co-Chair:Jerome ,and Crew Member:Gurpreet?",
-      "MGR Co-Chair:Abcedi, MGR Member:Flery, Crew Co-Chair:Gurpreet ,and Crew Member:Jerome?",
-      "MGR Co-Chair:Varun, MGR Member:Abcedi, Crew Co-Chair:Jerome ,and Crew Member:Gurpreet??"
+      "MGR Co-Chair:<strong>Stephen</strong>, MGR Member:<strong>Abcedi</strong>, Crew Co-Chair:<strong>Jerome</strong>, and Crew Member:<strong>Gurpreet</strong>",
+      "MGR Co-Chair:<strong>Abcedi</strong>, MGR Member:<strong>Stephen</strong>, Crew Co-Chair:<strong>Jerome</strong>, and Crew Member:<strong>Gurpreet</strong>",
+      "MGR Co-Chair:<strong>Abcedi</strong>, MGR Member:<strong>Flery</strong>, Crew Co-Chair:<strong>Gurpreet</strong>, and Crew Member:<strong>Jerome</strong>",
+      "MGR Co-Chair:<strong>Varun</strong>, MGR Member:<strong>Abcedi</strong>, Crew Co-Chair:<strong>Jerome</strong>, and Crew Member:<strong>Gurpreet</strong>"
     ],
     "answerIndex": 1
   }
